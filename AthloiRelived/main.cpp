@@ -7,9 +7,17 @@
 //
 
 #include <iostream>
+#include "Data/akvs.h"
 
 int main(int argc, const char * argv[]) {
-    // insert code here...
-    std::cout << "Hello, World!\n";
+    
+    int t = 0;
+    openDatabase("/Users/aitocir/bob.akvs");
+    setInt("LOL", 13);
+    printf("\njim\n");
+    t = getInt("LOL");
+    if (t==13) {
+        printf("SUCCESS!!!!");
+    }
     return 0;
 }

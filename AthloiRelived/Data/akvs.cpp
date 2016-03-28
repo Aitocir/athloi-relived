@@ -18,6 +18,7 @@
 #include <sys/stat.h>
 #include <vector>
 
+#include "akvs.h"
 #include "config.h"
 #include "input_shell.h"
 #include "structures.h"
@@ -212,7 +213,7 @@ key_value getValueForKey(key_value key) {
         key.setNonexistantKVPair();
     }
     else {
-        char* rawValueType;
+        char* rawValueType = new char[1];
         db_file.seekg(keyLookup.index + CONFIG_keySize);
         db_file.read(rawValueType, 1);
         key.type = getValueTypeForRawValue((uint8_t)*rawValueType);
@@ -583,23 +584,136 @@ bool writeNewAKVSdb(const char* fileName) {
     return true;
 }
 
-int main(int argc, const char * argv[]) {
+//int main(int argc, const char * argv[]) {
+//    
+//    // create a new file if this filepath does not exist
+//    // try to open the database if it does exist
+//    if (!ifstream(argv[1])) {
+//        // create a new default empty database
+//        if (!writeNewAKVSdb(argv[1])) {
+//            // writing new database failed!
+//            cout << "ERROR: didn't find existing database, and failed to write a new one. Check your access permissions on the file path.";
+//            return -1;
+//        }
+//    }
+//    //else {
+//        // open AKVS file
+//        db_file = fstream(argv[1], fstream::binary);
+//        db_file.open(argv[1]);
+//    //}
+//
+//    // verify the database header
+//    char* buffer = new char[CONFIG_HASHTABLE_START];
+//    db_file.seekg(0);
+//
+//    db_file.read(buffer, CONFIG_HASHTABLE_START);
+//    if (buffer[0] != 'A' || buffer[1] != 'K' || buffer[2] != 'V' || buffer[3] != 'S'){
+//        // wrong file leading 4 bytes
+//        cout << "ERROR: Database seems to be malformed! (Missing database header 'AKVS'\n)";
+//        return 2;
+//    }
+//    
+//    // get the key length for this database
+//    uint16_t keyLength = (buffer[4] << 8) + buffer[5];
+//    if (keyLength == 0) {
+//        // error: key length cannot be zero
+//        cout << "ERROR: Database seems to be malformed! (Key length is not allowed to be zero (0)\n)";
+//        return 3;
+//    }
+//    CONFIG_keySize = keyLength;
+//    
+//    // get value length weightings for this database
+//    for (int i=0; i<8; i++) {
+//        uint32_t weight = 1 << buffer[6+i];
+//
+//        if(CONFIG_weights.find(weight) == CONFIG_weights.end()){
+//            // not a valid weight
+//            cout << "ERROR: Database seems to be malformed! (Invalid value-length weight)";
+//            return 4;
+//        }
+//        else {
+//            CONFIG_weights[weight].insert(i+8);
+//        }
+//    }
+//    delete [] buffer;
+//    
+//    // database opened successfully!
+//    // inform the user and let the live session begin!
+//    cout << "Opened AKVS database!\n\tKey length: " << CONFIG_keySize \
+//    << "\n\tToo lazy to print key weights right meow...\n\n";
+//    
+//    // get database size
+//    db_file.seekg(0, db_file.end);
+//    db_fileSize = (uint32_t)db_file.tellg();
+//    
+//    if (argc >= 3) {
+//        //
+//        // extra params means command passed for non-interactive mode
+//        //
+//        cmd_result result = processCommand(argv[2]);
+//        cout << result.message;
+//        cout << endl;
+//        if (result.code == 0) {
+//            cout << result.contentString();
+//            cout << endl;
+//        }
+//        
+//        delete result.content.value;
+//        return 0;
+//    }
+//    else {
+//        //
+//        // just the database file provided
+//        // we will run in interactive mode
+//        //
+//        bool userHasQuit = false;
+//        cmd_result commandResult;
+//        commandResult.message = "";
+//        commandResult.code = -1;
+//        do {
+//            
+//            // 0) print out errors/feedback
+//            cout << commandResult.message;
+//            cout << endl;
+//            
+//            if (commandResult.code == 0){
+//                cout << commandResult.contentString();
+//                cout << endl;
+//            }
+//            
+//            // 1) print out prompt
+//            cout << "\n> ";
+//            
+//            // 2) gather user input
+//            string userInput;
+//            getline(cin, userInput);
+//            cin.clear();
+//            
+//            // 3) process input, set errors, etc
+//            commandResult = processCommand(userInput);
+//            
+//        } while (!userHasQuit);
+//        
+//        return commandResult.code;
+//    }
+//    
+//}
+
+// Database functions
+bool openDatabase(std::string filePath) {
     
     // create a new file if this filepath does not exist
     // try to open the database if it does exist
-    if (!ifstream(argv[1])) {
+    if (!ifstream(filePath.c_str())) {
         // create a new default empty database
-        if (!writeNewAKVSdb(argv[1])) {
+        if (!writeNewAKVSdb(filePath.c_str())) {
             // writing new database failed!
             cout << "ERROR: didn't find existing database, and failed to write a new one. Check your access permissions on the file path.";
-            return -1;
+            return false;
         }
     }
-    //else {
-        // open AKVS file
-        db_file = fstream(argv[1], fstream::binary);
-        db_file.open(argv[1]);
-    //}
+    db_file = fstream(filePath.c_str(), fstream::binary);
+    db_file.open(filePath.c_str());
 
     // verify the database header
     char* buffer = new char[CONFIG_HASHTABLE_START];
@@ -609,18 +723,18 @@ int main(int argc, const char * argv[]) {
     if (buffer[0] != 'A' || buffer[1] != 'K' || buffer[2] != 'V' || buffer[3] != 'S'){
         // wrong file leading 4 bytes
         cout << "ERROR: Database seems to be malformed! (Missing database header 'AKVS'\n)";
-        return 2;
+        return false;
     }
-    
+
     // get the key length for this database
     uint16_t keyLength = (buffer[4] << 8) + buffer[5];
     if (keyLength == 0) {
         // error: key length cannot be zero
         cout << "ERROR: Database seems to be malformed! (Key length is not allowed to be zero (0)\n)";
-        return 3;
+        return false;
     }
     CONFIG_keySize = keyLength;
-    
+
     // get value length weightings for this database
     for (int i=0; i<8; i++) {
         uint32_t weight = 1 << buffer[6+i];
@@ -628,7 +742,7 @@ int main(int argc, const char * argv[]) {
         if(CONFIG_weights.find(weight) == CONFIG_weights.end()){
             // not a valid weight
             cout << "ERROR: Database seems to be malformed! (Invalid value-length weight)";
-            return 4;
+            return false;
         }
         else {
             CONFIG_weights[weight].insert(i+8);
@@ -636,64 +750,234 @@ int main(int argc, const char * argv[]) {
     }
     delete [] buffer;
     
-    // database opened successfully!
-    // inform the user and let the live session begin!
-    cout << "Opened AKVS database!\n\tKey length: " << CONFIG_keySize \
-    << "\n\tToo lazy to print key weights right meow...\n\n";
+    return true;
+}
+
+bool closeDatabase() {
     
-    // get database size
-    db_file.seekg(0, db_file.end);
-    db_fileSize = (uint32_t)db_file.tellg();
+    return true;
+}
+
+// Setters
+bool setInt(std::string key, int32_t value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("int32");
     
-    if (argc >= 3) {
-        //
-        // extra params means command passed for non-interactive mode
-        //
-        cmd_result result = processCommand(argv[2]);
-        cout << result.message;
-        cout << endl;
-        if (result.code == 0) {
-            cout << result.contentString();
-            cout << endl;
+    uint64_t mask = 0x00000000FF000000;
+    int offset = (4-1) * 8;
+    kv.value = new char[4];
+    for(int i=0; i<4; i++) {
+        kv.value[i] = '\0';
+        kv.value[i] |= (uint8_t)((value & mask) >> offset);
+        mask >>= 8;
+        offset -= 8;
+    }
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+bool setBool(std::string key, bool value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("bool");
+    
+    kv.value = new char[1];
+    kv.value[0] = value ? '\0' : 255;
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+bool setString16(std::string key, std::string value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("char16");
+    
+    if(value.length() > 16) {
+        value = value.substr(0, 16);
+    }
+    kv.value = new char[16];
+    for(int i=0; i<16; i++) {
+        if(value.length() > i){
+            kv.value[i] = value[i];
         }
-        
-        delete result.content.value;
-        return 0;
+        else {
+            kv.value[i] = '\0';
+        }
+    }
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+bool setString64(std::string key, std::string value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("char64");
+    
+    if(value.length() > 64) {
+        value = value.substr(0, 64);
+    }
+    kv.value = new char[64];
+    for(int i=0; i<64; i++) {
+        if(value.length() > i){
+            kv.value[i] = value[i];
+        }
+        else {
+            kv.value[i] = '\0';
+        }
+    }
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+bool setString256(std::string key, std::string value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("char256");
+    
+    if(value.length() > 256) {
+        value = value.substr(0, 256);
+    }
+    kv.value = new char[256];
+    for(int i=0; i<256; i++) {
+        if(value.length() > i){
+            kv.value[i] = value[i];
+        }
+        else {
+            kv.value[i] = '\0';
+        }
+    }
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+bool setString1024(std::string key, std::string value) {
+    key_value kv;
+    kv.setKey(key);
+    kv.type = getValueTypeByName("char1024");
+    
+    if(value.length() > 1024) {
+        value = value.substr(0, 1024);
+    }
+    kv.value = new char[1024];
+    for(int i=0; i<1024; i++) {
+        if(value.length() > i){
+            kv.value[i] = value[i];
+        }
+        else {
+            kv.value[i] = '\0';
+        }
+    }
+    
+    setKeyValuePair(kv);
+    return true;
+}
+
+// Getters
+int getInt(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("int32");
+    kv = getValueForKey(kv);
+    
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return INT_MIN;
     }
     else {
-        //
-        // just the database file provided
-        // we will run in interactive mode
-        //
-        bool userHasQuit = false;
-        cmd_result commandResult;
-        commandResult.message = "";
-        commandResult.code = -1;
-        do {
-            
-            // 0) print out errors/feedback
-            cout << commandResult.message;
-            cout << endl;
-            
-            if (commandResult.code == 0){
-                cout << commandResult.contentString();
-                cout << endl;
-            }
-            
-            // 1) print out prompt
-            cout << "\n> ";
-            
-            // 2) gather user input
-            string userInput;
-            getline(cin, userInput);
-            cin.clear();
-            
-            // 3) process input, set errors, etc
-            commandResult = processCommand(userInput);
-            
-        } while (!userHasQuit);
-        
-        return commandResult.code;
+        return (int)kv.valueAs_int32();
     }
+}
+
+bool getBool(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("bool");
+    kv = getValueForKey(kv);
     
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return false;
+    }
+    else {
+        return kv.valueAs_bool();
+    }
+}
+
+std::string getString16(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("char16");
+    kv = getValueForKey(kv);
+    
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return "";
+    }
+    else {
+        return kv.valueAs_char16();
+    }
+}
+
+std::string getString64(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("char64");
+    kv = getValueForKey(kv);
+    
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return "";
+    }
+    else {
+        return kv.valueAs_char64();
+    }
+}
+
+std::string getString256(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("char256");
+    kv = getValueForKey(kv);
+    
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return "";
+    }
+    else {
+        return kv.valueAs_char256();
+    }
+}
+
+std::string getString1024(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    kv.type = getValueTypeByName("char1024");
+    kv = getValueForKey(kv);
+    
+    if (kv.type == value_type::EMPTY) {
+        // value is malformed
+        cout << "ERROR: key missing, or key is not of provided type.\n";
+        return "";
+    }
+    else {
+        return kv.valueAs_char1024();
+    }
+}
+
+// Delete
+bool deleteKey(std::string key) {
+    key_value kv;
+    kv.setKey(key.c_str());
+    return removeKey(kv);
 }
