@@ -52,3 +52,4 @@ xcuserdata/
 *.xcuserstate
 *.xcscheme
 *.plist
+.DS_Store
