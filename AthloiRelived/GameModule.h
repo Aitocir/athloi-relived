@@ -25,9 +25,11 @@ struct GameOutput {
 
 class GameModule {
     
+public:
     // Functions
-    GameOutput getOutputForInput(std::string input);
-    GameModule transitionToNextModule();
+    virtual GameOutput getOutputForStartOfModule() = 0;
+    virtual GameOutput getOutputForInput(std::string input) = 0;
+    virtual GameModule* transitionToNextModule() = 0;
 };
 
 #endif /* GameModule_h */

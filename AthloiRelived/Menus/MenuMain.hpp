@@ -27,7 +27,7 @@
 "\n"\
 "\n\t"
 
-class MenuMain : GameModule {
+class MenuMain : public GameModule {
     
 private:
     GameModule* nextModule;

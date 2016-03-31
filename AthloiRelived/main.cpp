@@ -43,6 +43,29 @@ int main(int argc, const char * argv[]) {
     
     // 1) Launch game with Main Menu
     GameModule* module = new MenuMain();
+    GameOutput output = module->getOutputForStartOfModule();
+    while (output.signal != Quit) {
+        
+        switch (output.signal) {
+            case NewModule:
+                module = module->transitionToNextModule();
+                cout << (module->getOutputForStartOfModule()).text;
+                break;
+            case Replace:
+                system(CMD_CLEAR_TERMINAL);
+            case Append:
+                cout << output.text;
+                break;
+            case Quit:
+                // not possible, while won't run in this case!
+                break;
+        }
+        
+        cout << "> ";
+        string input;
+        getline(cin, input);
+        output = module->getOutputForInput(input);
+    }
     
     closeDatabase();
     return 0;
