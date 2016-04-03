@@ -9,6 +9,7 @@
 #include <string>
 #include "akvs.h"
 #include "MenuMain.hpp"
+#include "LaborOne.hpp"
 
 using namespace std;
 
@@ -67,7 +68,7 @@ GameOutput MenuMain::getOutputForInput(string input) {
                 // start a new game
                 output.signal = NewModule;
                 output.text = "";
-                // TODO: this->nextModule = new NewGameModule()
+                this->nextModule = new LaborOne();
             }
             break;
             

@@ -19,15 +19,6 @@
 using namespace std;
 
 int main(int argc, const char * argv[]) {
-    
-//    int t = 0;
-//    openDatabase("/Users/aitocir/bob.akvs");
-//    setInt("LOL", 13);
-//    printf("\njim\n");
-//    t = getInt("LOL");
-//    if (t==13) {
-//        printf("SUCCESS!!!!");
-//    }
 
     // 0) Open connection to game database
     string pathPrefix = string(getenv(DATA_ROOT));
@@ -49,6 +40,7 @@ int main(int argc, const char * argv[]) {
         switch (output.signal) {
             case NewModule:
                 module = module->transitionToNextModule();
+                system(CMD_CLEAR_TERMINAL);
                 cout << (module->getOutputForStartOfModule()).text;
                 break;
             case Replace:
@@ -61,7 +53,7 @@ int main(int argc, const char * argv[]) {
                 break;
         }
         
-        cout << "> ";
+        cout << "\n\t-> ";
         string input;
         getline(cin, input);
         output = module->getOutputForInput(input);
