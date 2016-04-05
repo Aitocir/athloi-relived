@@ -23,6 +23,12 @@ private:
     }L2Stage;
     
     L2Stage currStage;
+    int laborM;
+    int laborS;
+    int laborC;
+    int laborH;
+    
+    GameOutput handleIntro1(std::string input);
     
 public:
     LaborTwo();

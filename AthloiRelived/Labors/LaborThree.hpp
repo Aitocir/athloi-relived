@@ -23,6 +23,10 @@ private:
     }L3Stage;
     
     L3Stage currStage;
+    int laborM;
+    int laborS;
+    int laborC;
+    int laborH;
     
 public:
     LaborThree();

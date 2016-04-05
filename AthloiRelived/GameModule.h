@@ -15,7 +15,8 @@ typedef enum GameSignal {
     Quit,
     Append,
     Replace,
-    NewModule
+    NewModule,
+    InvalidInput
 }GameSignal;
 
 struct GameOutput {

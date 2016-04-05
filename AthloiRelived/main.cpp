@@ -18,6 +18,19 @@
 
 using namespace std;
 
+string printOutputWithResetAndInvalidPrompt(string s, bool clear, bool invalid) {
+    
+    if (clear) {
+        system(CMD_CLEAR_TERMINAL);
+    }
+    cout << s;
+    if (invalid) {
+        cout << "\n[ERROR]: Invalid input. Try again.";
+    }
+    cout << "\n\t-> ";
+    return s;
+}
+
 int main(int argc, const char * argv[]) {
 
     // 0) Open connection to game database
@@ -35,30 +48,34 @@ int main(int argc, const char * argv[]) {
     // 1) Launch game with Main Menu
     GameModule* module = new MenuMain();
     GameOutput output = module->getOutputForStartOfModule();
+    string lastOutput;
     while (output.signal != Quit) {
         
         switch (output.signal) {
             case NewModule:
                 module = module->transitionToNextModule();
-                system(CMD_CLEAR_TERMINAL);
-                cout << (module->getOutputForStartOfModule()).text;
+                lastOutput = printOutputWithResetAndInvalidPrompt((module->getOutputForStartOfModule()).text, true, false);
                 break;
             case Replace:
-                system(CMD_CLEAR_TERMINAL);
+                lastOutput = printOutputWithResetAndInvalidPrompt(output.text, true, false);
+                break;
             case Append:
-                cout << output.text;
+                lastOutput = printOutputWithResetAndInvalidPrompt(output.text, false, false);
+                break;
+            case InvalidInput:
+                printOutputWithResetAndInvalidPrompt(lastOutput, true, true);
                 break;
             case Quit:
                 // not possible, while won't run in this case!
                 break;
         }
         
-        cout << "\n\t-> ";
         string input;
         getline(cin, input);
         output = module->getOutputForInput(input);
     }
     
+    // 2) Game ended by user, clean up
     closeDatabase();
     return 0;
 }

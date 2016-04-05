@@ -7,9 +7,20 @@
 //
 #include <stdio.h>
 #include <string>
-#include "akvs.h"
+#include "AthloiDAO.hpp"
 #include "MenuMain.hpp"
 #include "LaborOne.hpp"
+#include "LaborTwo.hpp"
+#include "LaborThree.hpp"
+#include "LaborFour.hpp"
+#include "LaborFive.hpp"
+#include "LaborSix.hpp"
+#include "LaborSeven.hpp"
+#include "LaborEight.hpp"
+#include "LaborNine.hpp"
+#include "LaborTen.hpp"
+#include "LaborEleven.hpp"
+#include "LaborTwelve.hpp"
 
 using namespace std;
 
@@ -17,6 +28,41 @@ static const char FIRST_CHAR_NEW = 'N';
 static const char FIRST_CHAR_CONT = 'C';
 static const string FIRST_OPT_NEW = "New";
 static const string FIRST_OPT_CONT = "Continue";
+
+GameModule* MenuMain::moduleForLaborNumber(int labor) {
+    if (labor < 1 || labor > 12) {
+        return new LaborOne();
+    }
+    
+    switch (labor) {
+        case 1:
+            return new LaborOne();
+        case 2:
+            return new LaborTwo();
+        case 3:
+            return new LaborThree();
+        case 4:
+            return new LaborFour();
+        case 5:
+            return new LaborFive();
+        case 6:
+            return new LaborSix();
+        case 7:
+            return new LaborSeven();
+        case 8:
+            return new LaborEight();
+        case 9:
+            return new LaborNine();
+        case 10:
+            return new LaborTen();
+        case 11:
+            return new LaborEleven();
+        case 12:
+            return new LaborTwelve();
+        default:
+            return new LaborOne();
+    }
+}
 
 GameOutput mainMenuAtFirstLaunch(bool gameInProgress, bool invalidInput) {
     
@@ -37,7 +83,7 @@ GameOutput mainMenuAtFirstLaunch(bool gameInProgress, bool invalidInput) {
 }
 
 GameOutput MenuMain::getOutputForStartOfModule() {
-    bool gameInProgress = getBool("GameInProgress");
+    bool gameInProgress = DAO::isGameInProgress();
     char firstMenuChar = gameInProgress ? FIRST_CHAR_CONT : FIRST_CHAR_NEW;
     string firstMenuItem = gameInProgress ? FIRST_OPT_CONT : FIRST_OPT_NEW;
     string format = MENUMAIN_FORMATBODY;
@@ -54,7 +100,7 @@ GameOutput MenuMain::getOutputForStartOfModule() {
 GameOutput MenuMain::getOutputForInput(string input) {
     
     GameOutput output;
-    bool gameInProgress = getBool("GameInProgress");
+    bool gameInProgress = DAO::isGameInProgress();
     char choice = tolower(input[0]);
     switch (choice) {
             
@@ -69,6 +115,14 @@ GameOutput MenuMain::getOutputForInput(string input) {
                 output.signal = NewModule;
                 output.text = "";
                 this->nextModule = new LaborOne();
+                
+                // make persistence changes necessary
+                DAO::setGameInProgress(true);
+                DAO::setPlayerMight(0);
+                DAO::setPlayerSkill(0);
+                DAO::setPlayerCunning(0);
+                DAO::setPlayerHumility(0);
+                DAO::setCurrentLabor(1);
             }
             break;
             
@@ -81,7 +135,7 @@ GameOutput MenuMain::getOutputForInput(string input) {
                 // continue current game
                 output.signal = NewModule;
                 output.text = "";
-                // TODO: this->nextModule = new ContinueGameModule()
+                this->nextModule = this->moduleForLaborNumber(DAO::getCurrentLabor());
             }
             break;
             

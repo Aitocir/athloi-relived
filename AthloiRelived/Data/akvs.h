@@ -9,7 +9,8 @@
 #ifndef akvs_h
 #define akvs_h
 
-#include <string.h>
+#include <stdlib.h>
+#include <string>
 
 // Database functions
 bool openDatabase(std::string filePath);

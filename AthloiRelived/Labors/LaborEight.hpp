@@ -23,6 +23,10 @@ private:
     }L8Stage;
     
     L8Stage currStage;
+    int laborM;
+    int laborS;
+    int laborC;
+    int laborH;
     
 public:
     LaborEight();

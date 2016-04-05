@@ -23,6 +23,10 @@ private:
     }L12Stage;
     
     L12Stage currStage;
+    int laborM;
+    int laborS;
+    int laborC;
+    int laborH;
     
 public:
     LaborTwelve();

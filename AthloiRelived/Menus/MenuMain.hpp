@@ -31,6 +31,7 @@ class MenuMain : public GameModule {
     
 private:
     GameModule* nextModule;
+    GameModule* moduleForLaborNumber(int labor);
     
 public:
     GameOutput getOutputForStartOfModule();

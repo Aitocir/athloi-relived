@@ -584,120 +584,6 @@ bool writeNewAKVSdb(const char* fileName) {
     return true;
 }
 
-//int main(int argc, const char * argv[]) {
-//    
-//    // create a new file if this filepath does not exist
-//    // try to open the database if it does exist
-//    if (!ifstream(argv[1])) {
-//        // create a new default empty database
-//        if (!writeNewAKVSdb(argv[1])) {
-//            // writing new database failed!
-//            cout << "ERROR: didn't find existing database, and failed to write a new one. Check your access permissions on the file path.";
-//            return -1;
-//        }
-//    }
-//    //else {
-//        // open AKVS file
-//        db_file = fstream(argv[1], fstream::binary);
-//        db_file.open(argv[1]);
-//    //}
-//
-//    // verify the database header
-//    char* buffer = new char[CONFIG_HASHTABLE_START];
-//    db_file.seekg(0);
-//
-//    db_file.read(buffer, CONFIG_HASHTABLE_START);
-//    if (buffer[0] != 'A' || buffer[1] != 'K' || buffer[2] != 'V' || buffer[3] != 'S'){
-//        // wrong file leading 4 bytes
-//        cout << "ERROR: Database seems to be malformed! (Missing database header 'AKVS'\n)";
-//        return 2;
-//    }
-//    
-//    // get the key length for this database
-//    uint16_t keyLength = (buffer[4] << 8) + buffer[5];
-//    if (keyLength == 0) {
-//        // error: key length cannot be zero
-//        cout << "ERROR: Database seems to be malformed! (Key length is not allowed to be zero (0)\n)";
-//        return 3;
-//    }
-//    CONFIG_keySize = keyLength;
-//    
-//    // get value length weightings for this database
-//    for (int i=0; i<8; i++) {
-//        uint32_t weight = 1 << buffer[6+i];
-//
-//        if(CONFIG_weights.find(weight) == CONFIG_weights.end()){
-//            // not a valid weight
-//            cout << "ERROR: Database seems to be malformed! (Invalid value-length weight)";
-//            return 4;
-//        }
-//        else {
-//            CONFIG_weights[weight].insert(i+8);
-//        }
-//    }
-//    delete [] buffer;
-//    
-//    // database opened successfully!
-//    // inform the user and let the live session begin!
-//    cout << "Opened AKVS database!\n\tKey length: " << CONFIG_keySize \
-//    << "\n\tToo lazy to print key weights right meow...\n\n";
-//    
-//    // get database size
-//    db_file.seekg(0, db_file.end);
-//    db_fileSize = (uint32_t)db_file.tellg();
-//    
-//    if (argc >= 3) {
-//        //
-//        // extra params means command passed for non-interactive mode
-//        //
-//        cmd_result result = processCommand(argv[2]);
-//        cout << result.message;
-//        cout << endl;
-//        if (result.code == 0) {
-//            cout << result.contentString();
-//            cout << endl;
-//        }
-//        
-//        delete result.content.value;
-//        return 0;
-//    }
-//    else {
-//        //
-//        // just the database file provided
-//        // we will run in interactive mode
-//        //
-//        bool userHasQuit = false;
-//        cmd_result commandResult;
-//        commandResult.message = "";
-//        commandResult.code = -1;
-//        do {
-//            
-//            // 0) print out errors/feedback
-//            cout << commandResult.message;
-//            cout << endl;
-//            
-//            if (commandResult.code == 0){
-//                cout << commandResult.contentString();
-//                cout << endl;
-//            }
-//            
-//            // 1) print out prompt
-//            cout << "\n> ";
-//            
-//            // 2) gather user input
-//            string userInput;
-//            getline(cin, userInput);
-//            cin.clear();
-//            
-//            // 3) process input, set errors, etc
-//            commandResult = processCommand(userInput);
-//            
-//        } while (!userHasQuit);
-//        
-//        return commandResult.code;
-//    }
-//    
-//}
 
 // Database functions
 bool openDatabase(std::string filePath) {
@@ -784,7 +670,7 @@ bool setBool(std::string key, bool value) {
     kv.type = getValueTypeByName("bool");
     
     kv.value = new char[1];
-    kv.value[0] = value ? '\0' : 255;
+    kv.value[0] = value ? 255 : '\0';
     
     setKeyValuePair(kv);
     return true;
