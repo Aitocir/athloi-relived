@@ -81,7 +81,7 @@
 "\t[A] Begin hunting\n"\
 "\t[B] Cleonae sounds like way more fun\n"
 
-#define L1TEXT_HUNTFAIL "You take another turn, and peer across the grasses. No movement there, %s.\n\n"\
+#define L1TEXT_HUNTFAIL "You take another turn, and peer across the grasses. No movement there.\n\n"\
 "\t============================== Your Choice of Action ==============================\n"\
 "\t[A] Continue hunting\n"\
 "\t[B] Give up and return to Cleonae\n"
@@ -106,7 +106,7 @@
 "\t<Hit Enter to return to King Eurystheus>"
 
 #define L1TEXT_SHOOT "You ignore the terror in your veins as the Lion rapidly closes the distance between you. With complete confidence, you draw your bow again, breathing deeply as the Lion bears down on you. Your keen eye focuses on the Lion's mouth, which hangs open in anticipation of your tasty flesh as it begins its attack leap. You release your arrow, and it flies toward the Lion...\n\n"\
-"... and buries its entire length into the roof of the Lion's mouth, a tell-tale bump in the Lion's impervious fur showing the arrow trying to pierce straight through its head. The Lion falls to the ground, skidding across the dirt, coming to a stop at your feet. Placing on efoot on its head, you take advantage of the moment to strike a glorious pose, regretting the lack of a nearby artist to capture the moment.\n\n"\
+"... and buries its entire length into the roof of the Lion's mouth, a tell-tale bump in the Lion's impervious fur showing the arrow trying to pierce straight through its head. The Lion falls to the ground, skidding across the dirt, coming to a stop at your feet. Placing one foot on its head, you take advantage of the moment to strike a glorious pose, regretting the lack of a nearby artist to capture the moment.\n\n"\
 "\tHail Hero! You have increased your Skill with that shot!!!\n\n"\
 "\t<Hit Enter to return to King Eurystheus>"
 
@@ -259,6 +259,7 @@ GameOutput LaborOne::handleFound(std::string input) {
 GameOutput LaborOne::handleShoot(std::string input) {
     // no invalid input; just returning home
     GameOutput o;
+    this->currStage = L1_WrapUp;
     o.signal = Replace;
     o.text = L1TEXT_RETURN;
     return o;
@@ -267,6 +268,7 @@ GameOutput LaborOne::handleShoot(std::string input) {
 GameOutput LaborOne::handleWrestle(std::string input) {
     // no invalid input; just returning home
     GameOutput o;
+    this->currStage = L1_WrapUp;
     o.signal = Replace;
     o.text = L1TEXT_RETURN;
     return o;
