@@ -275,22 +275,27 @@ GameOutput LaborOne::handleWrestle(std::string input) {
 GameOutput LaborOne::handleWrapup(std::string input) {
     // no invalid input; moving on to Labor 2 after a spiel
     GameOutput o;
-    if (this->nextModule == NULL) {
-        this->nextModule = new LaborTwo();
-        o.signal = Replace;
-        o.text = L1TEXT_RETURN; // TODO: another text entry, or we don't need this stage!!!
-        
-        // save this labor
-        DAO::incPlayerMight(this->laborM);
-        DAO::incPlayerSkill(this->laborS);
-        DAO::incPlayerCunning(this->laborC);
-        DAO::incPlayerHumility(this->laborH);
-        DAO::setCurrentLabor(2);
-    }
-    else {
-        o.signal = NewModule;
-        o.text = "";
-    }
+//    if (this->nextModule == NULL) {
+//        this->nextModule = new LaborTwo();
+//        o.signal = Replace;
+//        o.text = L1TEXT_RETURN; // TODO: another text entry, or we don't need this stage!!!
+//        
+//        // save this labor
+//        DAO::incPlayerMight(this->laborM);
+//        DAO::incPlayerSkill(this->laborS);
+//        DAO::incPlayerCunning(this->laborC);
+//        DAO::incPlayerHumility(this->laborH);
+//        DAO::setCurrentLabor(2);
+//    }
+//    else {
+//        o.signal = NewModule;
+//        o.text = "";
+//    }
+//    return o;
+    
+    this->nextModule = new LaborTwo();
+    o.signal = NewModule;
+    o.text = "";
     return o;
 }
 
